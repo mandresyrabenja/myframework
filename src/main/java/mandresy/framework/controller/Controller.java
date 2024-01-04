@@ -17,17 +17,17 @@ public class Controller {
 	protected ModelView view = new ModelView();
 
 	/**
-	 * Données reçu par cet controlleur en POST
+	 * Données reçues par cet controlleur en POST
 	 */
 	protected Map<String, String> post;
 	/**
-	 * Données reçu par cet controlleur en GET
+	 * Données reçues par cet controlleur en GET
 	 */
 	protected Map<String, String> get;
 	
 	/**
-	 * Ajouter un donnée pour le vue de cet controlleur. Les données seront ensuite accessible facilement
-	 *  par le vue en utilisant de l'EL(Expression Language).<br>
+	 * Ajouter une donnée pour la vue de cet controlleur. Les données seront ensuite accessible facilement
+	 *  par la vue en utilisant de l'EL(Expression Language).<br>
 	 *  <b>Exemple:</b><br>
 	 *  <b>Code du controlleur:</b><br>
 	 *  <code>addData("nom", "Mandresy")<code><br>
@@ -80,18 +80,18 @@ public class Controller {
 	}
 	
 	/**
-	 * Avoir un donnée de Http GET en utilisant sa clé correspondant
-	 * @param key Clé du donnée GET
-	 * @return Valeur correspondant aux clé
+	 * Avoir une donnée de Http GET en utilisant sa clé correspondante
+	 * @param key Clé de la donnée GET
+	 * @return Valeur correspondant à cette clé
 	 */
 	public String get(String key) {
 		return this.get.get(key);
 	}
 
 	/**
-	 * Avoir un donnée de Http POST en utilisant sa clé correspondant
-	 * @param key Clé du donnée POST
-	 * @return Valeur correspondant aux clé
+	 * Avoir une donnée de Http POST en utilisant sa clé correspondant
+	 * @param key Clé de la donnée POST
+	 * @return Valeur correspondant à cette clé
 	 */
 	public String post(String key) {
 		return this.post.get(key);

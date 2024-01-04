@@ -53,7 +53,7 @@ public class Database {
 			int nbAttributsNonNull = attributsNonNull.size();
 			
 			sql = String.format("DELETE FROM %s WHERE %s", 
-					filtre.getClass().getSimpleName(), // Nom du table = nom de l'object
+					filtre.getClass().getSimpleName(), // Nom de la table = nom de l'objet
 					getNomColonnesSelect(attributsNonNull.keys(), nbAttributsNonNull) ); // Noms des colonnes = Noms des attributs non null
 			
 			try(PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
@@ -323,9 +323,8 @@ public class Database {
 	}
 	
 	/**
-	 * Modifier la ligne du table de la base de donées qui correspond à l'objet
+	 * Modifier la ligne de la table de la base de données qui correspond à l'objet
 	 * @param object : object qui contient les nouvelles données
-	 * @param connection : connection sql utilisé pour la modification
 	 */
 	public static void updateToTable( Object object){
 		// Les attributs non null de l'object object
@@ -578,10 +577,9 @@ public class Database {
 	
 
 	/**
-	 * Avoir le valeur actuel ou valeurs suivant d'un séquence "ORACLE"
+	 * Avoir la valeur actuelle ou valeurs suivant d'une séquence "ORACLE"
 	 * @param donnee chaîne de caractères sequence_xxxx.nextVal ou sequence_xxxx.currval
-	 * @param connection
-	 * @return le valeur actuel ou valeurs suivant d'un séquence
+	 * @return la valeur actuelle ou valeurs suivant d'une séquence
 	 */
 	@SuppressWarnings("unused") // Dead code -> return 0
 	public static int getSequence(String donnee) {

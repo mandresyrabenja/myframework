@@ -11,23 +11,21 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.reflections.Reflections;
-
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import mandresy.framework.database.Database;
 import mandresy.framework.database.DatabaseConnection;
 import mandresy.framework.vue.ModelView;
+import org.reflections.Reflections;
 
 /**
  * FrontController de l'application. A part les requêtes HTTP des fichiers statique, 
- * touts les requêtes seront affectés à cet Servlet. Cet Servlet aura pour fonction d'envoyer convenablement chaque
- * requête au méthode du controlleur correspondant. Elle aura aussi pour rôle d'encapsuler les données reçus par GET ou par
- * POST en Map de String comme clé et d'object comme valeur, puis elle chargera la vue du méthode du controlleur une fois que
+ * toutes les requêtes seront affectés à cet Servlet. Cet Servlet aura pour fonction d'envoyer convenablement chaque
+ * requête à la méthode du controlleur correspondant. Elle aura aussi pour rôle d'encapsuler les données reçues par GET ou par
+ * POST en Map de String comme clé et object comme valeur, puis elle chargera la vue de la méthode du controlleur une fois que
  * cette derniere a fini ses opérations/traitements. 
  * 
  * @author Mandresy
@@ -35,14 +33,14 @@ import mandresy.framework.vue.ModelView;
 @WebServlet(description = "Front Controller des urls", urlPatterns = { "*.do" }, loadOnStartup = 1)
 public class FrontController extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-	private final Logger logger = Logger.getLogger("myFramework.controller.FrontController");
+	private final Logger logger = Logger.getLogger("mandresy.framework.controller.FrontController");
 	
 	/**
 	 * URI controlleur<br>
 	 * Exemple:<br>
 	 * /hello/displayhello.do[?name=Koto]
 	 */
-	private static Pattern controlerPattern = Pattern.compile("^/([a-zA-Z_]+)/([a-zA-Z_]+)\\.do(.)*$");
+	private static final Pattern CONTROLER_PATH_PATTERN = Pattern.compile("^/([a-zA-Z_]+)\\.do(.)*$");
 	
     /**
      * @see HttpServlet#HttpServlet()
@@ -54,44 +52,45 @@ public class FrontController extends HttpServlet {
     @Override
     public void init() throws ServletException {
     	super.init();
-    	Database.connection = DatabaseConnection.getConnection(this.getServletContext());
+    	Database.connection = DatabaseConnection.getConnection();
     }
     
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		frontController(request, response, "GET");
+		dispatchRequest(request, response, "GET");
 	}
 
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		frontController(request, response, "POST");
+		dispatchRequest(request, response, "POST");
 	}
 
 	/**
-	 * Traîtement de l'url du client HTTP
+	 * Traîtement de l'URL du client HTTP
 	 * @param request HttpRequest
 	 * @param response HttpResponse
-	 * @param requestType <b>"GET"</b> pour requete GET<br> 
+	 * @param requestType <b>"GET"</b> pour la requête GET<br>
 	 * et <b>"POST"</b> pour requête POST
 	 * @throws IOException 
 	 * @throws ServletException 
 	 */
-	private void frontController(HttpServletRequest request, HttpServletResponse response, String requestType) throws IOException, ServletException {
+	private void dispatchRequest(HttpServletRequest request, HttpServletResponse response, String requestType) throws IOException, ServletException {
 		response.setContentType("text/html;charset=UTF-8");
 		
-		// Traitement url d'un controlleur
-		Matcher matcher = controlerPattern.matcher(request.getRequestURI());
+		// Traitement url du controlleur
+		Matcher matcher = CONTROLER_PATH_PATTERN.matcher(request.getRequestURI());
 		if(matcher.matches()) {
 			// Méthode de l'URL 
-			String url = matcher.group(2);
+			String url = matcher.group(1);
 			Method controlerMethod = getUrlMethod(url);
 			if(null == controlerMethod) {
-				response.getWriter().write("Aucun controlleur correspond à " + url);
-				logger.log(Level.SEVERE, "Aucun controlleur correspond à " + url);
+				String msg = "Aucun controlleur correspond à " + url;
+				response.getWriter().write(msg);
+				logger.log(Level.SEVERE, msg);
 				return;
 			}
 			
@@ -99,17 +98,17 @@ public class FrontController extends HttpServlet {
 			Class<?> controlerClass = controlerMethod.getDeclaringClass();
 			
 			try {
-				// Instanciation du controlleur
+				// Instanciation de la classe du controlleur
 				Object controler = controlerClass.getConstructor().newInstance();
 				
-				// Ajout des données du GET ou POST au controlleur
+				// Ajout des données de la requête HTTP GET ou POST au controlleur
 				if("GET".equalsIgnoreCase(requestType)){
 					controlerClass.getMethod("setGet", Map.class).invoke(controler, getParamsMap(request));
 				} else if("POST".equalsIgnoreCase(requestType)){
 					controlerClass.getMethod("setPost", Map.class).invoke(controler, getParamsMap(request));
 				}
 				
-				//Résultats du requete http
+				//Résultats du requête http
 				ModelView modelView =  (ModelView) controlerClass.getMethod(controlerMethod.getName(), null).invoke(controler);
 				if(null == modelView) {
 					throw new RuntimeException("La méthode " + controlerClass.getName() + "."
@@ -118,8 +117,8 @@ public class FrontController extends HttpServlet {
 				
 				// Données envoyées aux vues
 				if( !modelView.getData().isEmpty()) {
-					// Ajout chaques données aux attributs du HttpRequest
-					// pour qu'elles soient accessibles en utilisant ${sonNom } aux jsp
+					// Ajouter chaque donnée aux attributs du HttpRequest
+					// pour qu'elles soient accessibles en utilisant ${sonNom} aux jsp
 					for(Map.Entry<String, Object> d : modelView.getData().entrySet()) {
 						request.setAttribute(d.getKey(), d.getValue());
 					}
@@ -151,21 +150,20 @@ public class FrontController extends HttpServlet {
 				e.printStackTrace();
 			}
 				
-		} 		
+		}
 	}	
 
 	/**
 	 * Avoir la méthode du controlleur corespondant à l'URL entré
-	 * @param url URL du méthode
-	 * @param classes Vector qui contient les classes des contrôlleurs
-	 * @return la méthode du controlleur correspondant à l'URL 
+	 * @param url URL de la méthode
+	 * @return la méthode du controlleur correspondant à l'URL
 	 */
 	private Method getUrlMethod(String url) {
-		// Set des classes du package app.controler
-		Reflections reflections = new Reflections("app.controller");
+		// Set des classes du package app
+		Reflections reflections = new Reflections("app");
 		Set<Class<? extends Controller>> classes = reflections.getSubTypesOf(Controller.class);		
 		
-		// Parcours du liste des classes des controlleurs
+		// Parcours de la liste des classes des controlleurs
 	    for (Class<?> klass : classes) {
 	    	//Parcours des méthodes de chaque classe
 	        for (Method method : klass.getDeclaredMethods()) {
@@ -185,7 +183,7 @@ public class FrontController extends HttpServlet {
 	}
 	
 	/**
-	 * Avoir les données d'un HttpServletRequest en Map
+	 * Récupérer les données du HttpServletRequest en Map
 	 * @param request HttpServletRequest
 	 * @return les données du HttpServletRequest en Map
 	 */
@@ -194,7 +192,7 @@ public class FrontController extends HttpServlet {
 		Map<String, String[]> paramMap = request.getParameterMap();
 		// Celle qu'on veut
 		// Rélation String => String
-		Map<String, String> results = new HashMap<String, String>();
+		Map<String, String> results = new HashMap<>();
 		
 		// Transformation
 		for(String paramName : paramMap.keySet()) {
