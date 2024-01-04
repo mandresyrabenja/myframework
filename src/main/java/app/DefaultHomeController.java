@@ -1,4 +1,4 @@
-package app.controller;
+package app;
 
 import mandresy.framework.controller.ControllerMethod;
 import mandresy.framework.controller.Controller;
@@ -16,15 +16,15 @@ import mandresy.framework.vue.ModelView;
  * @author Mandresy
  *
  */
-public class Welcome extends Controller {
+public class DefaultHomeController extends Controller {
 
-	@ControllerMethod(uri = "hello")
+	@ControllerMethod(uri = "defaultHome")
 	public ModelView hello() {
-		// Récuperation d'un donnée du Http GET et affectation au donnée du vue de cet controlleur
+		// Récuperation d'une donnée de la requête HTTP GET et affectation aux données de la vue de cet controlleur
 		addData("name", get("name"));
-		
-		// Ajout du vue de cet controlleur
-		setVue("hello");
+
+		// Ajout de la vue de cet controlleur
+		setVue("default-home");
 		return this.view;
 	}
 	

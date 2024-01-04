@@ -6,9 +6,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Welcome to my framework</title>
+<title>Welcome to my housemade framework</title>
 </head>
 <body>
-	<h1>Welcome ${name }</h1>
+	<h1>Welcome to my housemade framework ${name }</h1>
 </body>
 </html>

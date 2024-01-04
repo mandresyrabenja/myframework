@@ -7,7 +7,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Annotation utilisé pour préciser l'URI d'une méthode d'un controlleur HTTP.
+ * Annotation utilisée pour préciser l'URI d'une méthode d'un controlleur HTTP.
  * 
  * @author Mandresy
  *
